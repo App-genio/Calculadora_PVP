@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Costos</title>
+    <!-- 
+      ¡Importante! 
+      Esta línea enlaza el archivo manifest.json. 
+      Es crucial para que el navegador sepa que es una PWA.
+    -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- Incluye Tailwind CSS para un diseño moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define la fuente Inter para un aspecto limpio */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Un color de fondo suave */
+        }
+        /* Estilo para el input de precio */
+        .price-input-container {
+            position: relative;
+            background: linear-gradient(145deg, #e0e7ff, #c7d2fe);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            box-shadow: 5px 5px 10px #c5c5c5, -5px -5px 10px #ffffff;
+            transition: all 0.3s ease-in-out;
+        }
+        .price-input-container:focus-within {
+            box-shadow: inset 5px 5px 10px #b1b9e2, inset -5px -5px 10px #e1e9ff;
+        }
+        .price-input {
+            width: 100%;
+            height: 4rem; /* Altura más grande */
+            font-size: 2.5rem; /* Letra más grande */
+            font-weight: 700; /* Negrita */
+            color: #1f2937; /* Color de texto oscuro */
+            background: transparent;
+            border: none;
+            outline: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .currency-symbol-large {
+            font-size: 2rem;
+            color: #6366f1;
+            font-weight: 700;
+        }
+        /* Ajuste de los otros inputs para que se vean bien */
+        .standard-input {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #e5e7eb;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .standard-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-gray-900 mb-6">
+            Calculadora de Costos y PVP
+        </h1>
+        <p class="text-center text-gray-600 mb-8">
+            Ingresa los datos para calcular el Costo Kárdex y el Precio de Venta al Público.
+        </p>
+
+        <form id="calculationForm" class="space-y-6">
+            <!-- Sección de entrada de precio y moneda - Diseño mejorado -->
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Precio del Producto</label>
+                <div class="price-input-container">
+                    <div class="flex items-center">
+                        <input type="number" step="0.01" id="price" name="price"
+                               class="price-input"
+                               placeholder="Ej: 100" required>
+                        <span id="currencySymbol" class="currency-symbol-large pr-4">$</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex space-x-4">
+                    <div class="flex items-center">
+                        <input id="currencyUSD" name="currency" type="radio" value="USD" checked
+                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                        <label for="currencyUSD" class="ml-2 block text-sm font-medium text-gray-700">
+                            Dólares (USD)
+                        </label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="currencyEUR" name="currency" type="radio" value="EUR"
+                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                        <label for="currencyEUR" class="ml-2 block text-sm font-medium text-gray-700">
+                            Euros (EUR)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de entrada del tipo de cambio y factor de importación -->
+            <div class="bg-gray-50 p-6 rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="exchangeRate" class="block text-sm font-medium text-gray-700">Tipo de Cambio</label>
+                    <div class="mt-1 flex rounded-lg shadow-sm">
+                        <input type="number" step="0.0001" id="exchangeRate" name="exchangeRate"
+                               class="standard-input rounded-l-lg"
+                               placeholder="Ej: 3.60" required>
+                        <div class="inline-flex items-center px-4 rounded-r-lg border-2 border-l-0 border-gray-300 bg-white text-gray-500">
+                            <span>Moneda Local</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="importFactor" class="block text-sm font-medium text-gray-700">Factor de Importación</label>
+                    <div class="mt-1 flex rounded-lg shadow-sm">
+                        <input type="number" step="0.01" id="importFactor" name="importFactor" value="1.3"
+                               class="standard-input"
+                               placeholder="Ej: 1.3" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de cálculo -->
+            <div class="flex justify-center">
+                <button type="submit"
+                        class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    Calcular
+                </button>
+            </div>
+        </form>
+
+        <!-- Sección de resultados -->
+        <div id="results" class="mt-8 space-y-4 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 text-center">Resultados</h2>
+            
+            <!-- Costo Kárdex inicial -->
+            <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 text-indigo-800">
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-indigo-800">Costo Kárdex (Inicial)</h3>
+                        <p id="kardexCost" class="mt-1 text-xl font-bold text-indigo-900">S/ 0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900 text-center mb-4">Opciones de Precio de Venta (PVP)</h3>
+
+            <!-- Opciones de PVP en una sola línea -->
+            <div class="flex flex-col sm:flex-row justify-between items-stretch gap-4 text-center">
+                
+                <!-- Opción Inferior -->
+                <div class="flex-1 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md">
+                    <h4 class="text-sm font-medium text-yellow-800">PVP Inferior</h4>
+                    <p id="inferiorPvp" class="mt-1 text-xl font-bold text-yellow-900">S/ 0.00</p>
+                    <p class="mt-2 text-sm text-yellow-700">CV(%): <span id="inferiorCV" class="font-bold">0.00%</span></p>
+                </div>
+
+                <!-- Opción Sugerida -->
+                <div class="flex-1 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg shadow-md">
+                    <h4 class="text-sm font-medium text-green-800">PVP Sugerido</h4>
+                    <p id="pvpSugerido" class="mt-1 text-xl font-bold text-green-900">S/ 0.00</p>
+                    <p class="mt-2 text-sm text-green-700">CV(%): <span id="pvpSugeridoCV" class="font-bold">0.00%</span></p>
+                </div>
+                
+                <!-- Opción Superior -->
+                <div class="flex-1 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg shadow-md">
+                    <h4 class="text-sm font-medium text-blue-800">PVP Superior</h4>
+                    <p id="superiorPvp" class="mt-1 text-xl font-bold text-blue-900">S/ 0.00</p>
+                    <p class="mt-2 text-sm text-blue-700">CV(%): <span id="superiorCV" class="font-bold">0.00%</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ¡Importante! 
+        // Este script registra el service worker si es compatible con el navegador.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Fallo el registro del Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Escucha cuando el documento HTML ha cargado completamente.
+        document.addEventListener('DOMContentLoaded', () => {
+            // Referencias a los elementos del DOM.
+            const form = document.getElementById('calculationForm');
+            const priceInput = document.getElementById('price');
+            const exchangeRateInput = document.getElementById('exchangeRate');
+            const importFactorInput = document.getElementById('importFactor');
+            const currencyUSD = document.getElementById('currencyUSD');
+            const currencyEUR = document.getElementById('currencyEUR');
+            const currencySymbol = document.getElementById('currencySymbol');
+            const resultsSection = document.getElementById('results');
+            const kardexCostElement = document.getElementById('kardexCost');
+            const pvpSugeridoElement = document.getElementById('pvpSugerido');
+            const pvpSugeridoCVElement = document.getElementById('pvpSugeridoCV');
+            const inferiorPvpElement = document.getElementById('inferiorPvp');
+            const inferiorCVElement = document.getElementById('inferiorCV');
+            const superiorPvpElement = document.getElementById('superiorPvp');
+            const superiorCVElement = document.getElementById('superiorCV');
+
+            // Define los tipos de cambio por defecto.
+            const defaultExchangeRates = {
+                'USD': 3.60,
+                'EUR': 4.10
+            };
+
+            // Función para actualizar los valores por defecto del tipo de cambio.
+            const updateDefaultExchangeRate = () => {
+                const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
+                exchangeRateInput.value = defaultExchangeRates[selectedCurrency];
+                currencySymbol.textContent = selectedCurrency === 'USD' ? '$' : '€';
+            };
+
+            // Llama a la función al cargar la página para establecer los valores iniciales.
+            updateDefaultExchangeRate();
+            
+            // Actualiza el símbolo y el valor del tipo de cambio cuando se cambia la moneda.
+            currencyUSD.addEventListener('change', updateDefaultExchangeRate);
+            currencyEUR.addEventListener('change', updateDefaultExchangeRate);
+
+            // Lógica para el cálculo cuando se envía el formulario.
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); // Evita que la página se recargue.
+
+                // Obtener los valores de los inputs.
+                const price = parseFloat(priceInput.value);
+                const exchangeRate = parseFloat(exchangeRateInput.value);
+                const importFactor = parseFloat(importFactorInput.value);
+
+                // Validaciones básicas para asegurar que los inputs son números válidos.
+                if (isNaN(price) || isNaN(exchangeRate) || isNaN(importFactor) || price <= 0 || exchangeRate <= 0 || importFactor <= 0) {
+                    const errorMessage = "Por favor, ingresa valores numéricos válidos y positivos.";
+                    console.error(errorMessage);
+                    return;
+                }
+
+                // Definir las constantes de las fórmulas.
+                const factorIGV = 1.18;
+                const cvEsperado = 0.38;
+
+                // Calcular el Costo Kárdex inicial. Este valor no cambia.
+                const kardexCost = price * importFactor * exchangeRate;
+
+                // Calcular el PVP (Precio de Venta al Público) sugerido.
+                const pvpSugerido = (kardexCost * factorIGV) / cvEsperado;
+
+                // Mostrar los resultados principales en la interfaz de usuario.
+                kardexCostElement.textContent = `S/ ${kardexCost.toFixed(2)}`;
+                pvpSugeridoElement.textContent = `S/ ${pvpSugerido.toFixed(2)}`;
+
+                // --- LÓGICA DE CÁLCULO DE PVP y Costo de Venta (%) ---
+                
+                // Paso 1: Calcular la opción de PVP superior (.90)
+                const pvpSuperior = (Math.ceil(pvpSugerido / 10) * 10 - 0.1);
+                
+                // Paso 2: Calcular la opción de PVP inferior (.90)
+                const pvpInferior = pvpSuperior - 10;
+                
+                // Paso 3: Calcular el "Costo de Venta (%)" para cada opción usando el Costo Kárdex inicial.
+                // Fórmula: (Costo Kárdex * IGV) / PVP
+                const cvPercentSugerido = ((kardexCost * factorIGV) / pvpSugerido) * 100;
+                const cvPercentInferior = ((kardexCost * factorIGV) / pvpInferior) * 100;
+                const cvPercentSuperior = ((kardexCost * factorIGV) / pvpSuperior) * 100;
+                
+                // Mostrar las nuevas opciones en la interfaz.
+                inferiorPvpElement.textContent = `S/ ${pvpInferior.toFixed(2)}`;
+                inferiorCVElement.textContent = `${cvPercentInferior.toFixed(2)}%`;
+
+                pvpSugeridoCVElement.textContent = `${cvPercentSugerido.toFixed(2)}%`;
+
+                superiorPvpElement.textContent = `S/ ${pvpSuperior.toFixed(2)}`;
+                superiorCVElement.textContent = `${cvPercentSuperior.toFixed(2)}%`;
+                
+                // Muestra la sección de resultados (si estaba oculta).
+                resultsSection.classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
