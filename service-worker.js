@@ -3,9 +3,9 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Asegúrate de que las URLs de tus íconos sean accesibles
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  // URLs de los íconos SVG corregidas para que funcionen
+  '/icon-192x192.svg',
+  '/icon-512x512.svg',
   // URL de Tailwind CSS CDN para que funcione sin conexión
   'https://cdn.tailwindcss.com'
 ];
@@ -35,3 +35,4 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
